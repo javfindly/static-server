@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  <script type="text/javascript" src="jolokia.js"></script>
+  <script type="text/javascript" src="jolokia-simple.js"></script>
+  <script type="text/javascript">
+  	// Create a new jolokia client accessing the agent on the same
+	// Host which serves this document:
+	var j4p = new Jolokia("http://dev-batchprocessor.findly.com:8080/jolokia");
+
+	if (typeof String.prototype.endsWith !== 'function') {
+	    String.prototype.endsWith = function(suffix) {
+	        return this.indexOf(suffix, this.length - suffix.length) !== -1;
+	    };
+	}
+
+	function getRoutes(camelObjects) {
+		for(var name in camelObjects) {
+			if(name.endsWith("type=routes")) {
+				console.log(name);
+				console.log(camelObjects[name]);
+			}
+		}
+	}
+	// Request the memory information asynchronously and print it on
+	// the console
+	j4p.request(
+		{
+			type: "list",
+			path: 'org.apache.camel:context=camel-1,name="profile-import.create-batch"'
+		},
+		{
+		success: function(response) {
+			console.log(response.value)
+			getRoutes(response.value)
+		}
+	});
+
+	j4p.request(
+		{
+			type: 'exec',
+			mbean: 'org.apache.camel:context=camel-1,type=context,name="camel-1"',
+			operation: 'dumpRoutesAsXml()'
+		},
+		{
+		success: function(response) {
+			console.log(response.value)
+			getRoutes(response.value)
+		}
+	});
+	
+  </script>
+</head>
+<body>
+
+</body>
+</html>
